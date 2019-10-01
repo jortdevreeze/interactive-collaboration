@@ -140,7 +140,7 @@ class Controller_Trial extends Base_Controller
 				$trialModel = new Model_Trial($this->getConfiguration('model'));
 				$trial = $trialModel->getTimestampForActiveTrials();
 				
-				if (count($trial) != 1) {
+				if (count((array)$trial) != 1) {
 					
 					http_response_code(404);
 					echo json_encode(array('status' => 1));
