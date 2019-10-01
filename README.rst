@@ -12,6 +12,7 @@ Free for personal or research use; for commercial use please contact me. If you 
 Bibtex:
 
 .. code-block:: tex
+
   @misc{de_Vreeze_2019,
     author = {de Vreeze, Jort},
     title = {interactive-collaboration},
