@@ -146,7 +146,10 @@ class Model_Subject extends Base_Model
             $this->getTableName(), $condition)
         );
         
-        return $result;
+	while ($row = $result->fetch_object()){
+		return $row->frequency;
+	}
+
     }
 	
 	public function getSubjectCount($assigned)
