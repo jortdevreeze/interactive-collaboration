@@ -496,12 +496,12 @@ class Controller_Trial extends Base_Controller
 					}
 					
 					$size = count($left) + count($right);
-					
-					if ($size <= 1) {
-						
-						http_response_code(404);
-						$code = 2;
-						
+					if ($size == 0) {
+						http_response_code(200);
+						$code = 0;
+					} else if ($size == 1) {						
+						http_response_code(200);
+						$code = 2;						
 					} else {
 
 						if (!empty($distribution)) {
