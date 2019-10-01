@@ -12,12 +12,13 @@ Free for personal or research use; for commercial use please contact me. If you 
 Bibtex:
 
 .. code-block:: tex
-  @misc{deVreeze2019,
+  @misc{de_Vreeze_2019,
     author = {de Vreeze, Jort},
     title = {interactive-collaboration},
     year = {2019},
     publisher = {GitHub},
     journal = {GitHub repository},
-    howpublished = {\url{https://github.com/jortdevreeze/interactive-collaboration}},
+    howpublished = {\url{https://github.com/jortdevreeze/interactive-collaboration}
   }
+
 
