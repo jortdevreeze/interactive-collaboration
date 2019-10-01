@@ -657,9 +657,8 @@ class Controller_Trial extends Base_Controller
 
 								$subject['PartnerId'] = ($partner->l == $row->id) ? $partner->r : $partner->l;
 								$subject['Session'] = $partner->session;
-								
-								$threshold = $subjectModel->getNumberOfSubjectsInCondition($row->c);
-								$subject['Threshold'] = $threshold->frequency;
+
+								$subject['Threshold'] = $subjectModel->getNumberOfSubjectsInCondition($row->c);
 								
 								$details[] = $subject;
 								
@@ -685,9 +684,8 @@ class Controller_Trial extends Base_Controller
 
 						$details['PartnerId'] = ($partner->l == $subjectId) ? $partner->r : $partner->l;
 						$details['Session'] = $partner->session;
-						
-						$threshold = $subjectModel->getNumberOfSubjectsInCondition($subject->c);
-						$details['Threshold'] = $threshold->frequency;
+
+						$details['Threshold'] = $subjectModel->getNumberOfSubjectsInCondition($subject->c);
 						
 					}
 					
