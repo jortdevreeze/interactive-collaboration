@@ -61,5 +61,31 @@ class Model_Trial extends Base_Model
         
         return $result->fetch_object();
     }
+	
+    public function isActiveTrialReady()
+    {
+		
+		$result = $this->query(
+            sprintf("SELECT ready FROM %s WHERE active = 1", $this->getTableName())
+        );
+
+		if (false != $result && $result->num_rows > 0) {
+			while ($row = $result->fetch_object()){
+				return $row->ready;
+			}
+		}
+		
+		return 0;
+		
+    }
+	
+    public function setActiveTrialAsReady()
+    {
+        $result = $this->query(
+            sprintf("UPDATE %s SET ready = 1 WHERE active = 1", $this->getTableName())
+         );
+        
+        return $result;
+    }
 
 }
