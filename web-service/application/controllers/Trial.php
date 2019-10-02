@@ -478,114 +478,122 @@ class Controller_Trial extends Base_Controller
 					
 					$trialId = current($trial);
 					
-					$subjects = $subjectModel->getUnassignedSubjects($trialId);
-					$distribution = $subjectModel->getConditionCount();
+					/* 
+					 * Check if matching took place already took place 
+					 */
+					if (0 == $trialModel->isActiveTrialReady()) { 
 					
-					$conditions = range(1, $this->getConfiguration('conditions')['number']);
-					$conditions = array_fill_keys($conditions, 0);
-					
-					$left = $right = array();
-					$split = $this->getConfiguration('conditions')['range'] / 2;
-										
-					while ($row = $subjects->fetch_object()){
-						if ($row->value > $split) {
-							$right[$row->id] = $row->value;
-						} else {
-							$left[$row->id] = $row->value;
-						}
-					}
-					
-					$size = count($left) + count($right);
-					if ($size == 0) {
-						http_response_code(200);
-						$code = 0;
-					} else if ($size == 1) {						
-						http_response_code(200);
-						$code = 2;						
-					} else {
+						$subjects = $subjectModel->getUnassignedSubjects($trialId);
+						$distribution = $subjectModel->getConditionCount();
+						
+						$conditions = range(1, $this->getConfiguration('conditions')['number']);
+						$conditions = array_fill_keys($conditions, 0);
+						
+						$left = $right = array();
+						$split = $this->getConfiguration('conditions')['range'] / 2;
 
-						if (!empty($distribution)) {
-							while ($row = $distribution->fetch_object()){
-								$conditions[$row->c] = $row->frequency;
-							}						
+						while ($row = $subjects->fetch_object()){
+							if ($row->value > $split) {
+								$right[$row->id] = $row->value;
+							} else {
+								$left[$row->id] = $row->value;
+							}
 						}
-											
-						$i = 0;
-						while ($i < $size) {
-							
-							$flag = false;
-							
-							$leftCount = count($left);
-							$rightCount = count($right);
-							
-							if ($rightCount > 1) {
+						
+						$size = count($left) + count($right);
+						
+						if ($size > 1) {		
+
+							if (!empty($distribution)) {
+								while ($row = $distribution->fetch_object()){
+									$conditions[$row->c] = $row->frequency;
+								}						
+							}
+												
+							$i = 0;
+							while ($i < $size) {
 								
-								if ($conditions[4] <= ($conditions[2] + $conditions[3]) || $leftCount == 0) {
-
-									$subject = array_keys($right);
+								$flag = false;
+								
+								$leftCount = count($left);
+								$rightCount = count($right);
+								
+								if ($rightCount > 1) {
 									
-									$subjectModel->assignSubject($subject[0], 4);
-									$subjectModel->assignSubject($subject[1], 4);
+									if ($conditions[4] <= ($conditions[2] + $conditions[3]) || $leftCount == 0) {
+
+										$subject = array_keys($right);
+										
+										$subjectModel->assignSubject($subject[0], 4); 
+										$subjectModel->assignSubject($subject[1], 4); 
+										
+										$dyadModel->createDyad($trialId, $subject[0], $subject[1]);
+										
+										$conditions[4] += 2;
+										$right = array_slice($right, 2, count($right), true); 
+										
+									} else {								
+										$flag = true;															
+									}
+									
+								} else if ($rightCount == 1 && $leftCount >= 1) {
+									$flag = true;
+								} else if ($leftCount > 1) {
+									
+									$subject = array_keys($left);
+										
+									$subjectModel->assignSubject($subject[0], 1);
+									$subjectModel->assignSubject($subject[1], 1);
 									
 									$dyadModel->createDyad($trialId, $subject[0], $subject[1]);
 									
-									$conditions[4] += 2;
-									$right = array_slice($right, 2, count($right), true); 
+									$conditions[1] += 2;
+									$left = array_slice($left, 2, count($left), true);
 									
-								} else {								
-									$flag = true;															
 								}
 								
-							} else if ($rightCount == 1 && $leftCount >= 1) {
-								$flag = true;
-							} else if ($leftCount > 1) {
-								
-								$subject = array_keys($left);
+								if (true == $flag) {
 									
-								$subjectModel->assignSubject($subject[0], 1);
-								$subjectModel->assignSubject($subject[1], 1);
-								
-								$dyadModel->createDyad($trialId, $subject[0], $subject[1]);
-								
-								$conditions[1] += 2;
-								$left = array_slice($left, 2, count($left), true);
-								
-							}
+									if ($conditions[2] < $conditions[3]) {
+										$number = 2;								
+										$conditions[$number] += 2;
+									} else {
+										$number = 3;	
+										$conditions[$number] += 2;
+									}
+									
+									$subject = [array_keys($left)[0], array_keys($right)[0]];
+									
+									$subjectModel->assignSubject($subject[0], $number);
+									$subjectModel->assignSubject($subject[1], $number);
+									
+									$dyadModel->createDyad($trialId, $subject[0], $subject[1]);
+
+									$left = array_slice($left, 1, count($left), true); 								
+									$right = array_slice($right, 1, count($right), true);
+									
+								}
 							
-							if (true == $flag) {
-								
-								if ($conditions[2] < $conditions[3]) {
-									$number = 2;								
-									$conditions[$number] += 2;
-								} else {
-									$number = 3;	
-									$conditions[$number] += 2;
-								}
-								
-								$subject = [array_keys($left)[0], array_keys($right)[0]];
-								
-								$subjectModel->assignSubject($subject[0], $number);
-								$subjectModel->assignSubject($subject[1], $number);
-								
-								$dyadModel->createDyad($trialId, $subject[0], $subject[1]);
+								$i += 2;
 
-								$left = array_slice($left, 1, count($left), true); 								
-								$right = array_slice($right, 1, count($right), true);
-								
-							}
-						
-							$i += 2;
-
+							}							
+							
 						}
 						
-						http_response_code(200);
-						$code = 0;
-						
+						/* 
+						 * Update the model that matching took place 
+						 */
+						$trialModel->setActiveTrialAsReady();
+					
 					}
+					
+					http_response_code(200);
+					$code = 0;
 					
 				}
 				
-			}			
+			}
+			
 		} else {
 			$this->redirect('index', 'trial');  
 		}
