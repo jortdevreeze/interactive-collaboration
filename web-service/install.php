@@ -167,6 +167,7 @@ if ($method == 'POST') {
                 'id INT(11) NOT NULL AUTO_INCREMENT, '.
                 'timestamp datetime NOT NULL, '.
                 'active tinyint(1) NOT NULL, '.
+		'ready tinyint(1) NOT NULL, '.
                 'PRIMARY KEY ( id ))';
             $sql[] = 'CREATE TABLE IF NOT EXISTS subject ( '.
                 'id INT(11) NOT NULL AUTO_INCREMENT, '.
